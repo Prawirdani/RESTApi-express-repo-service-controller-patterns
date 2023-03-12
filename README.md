@@ -3,6 +3,8 @@ An example of Expressjs RESTful API using Typescript with **Repository** -> **Se
 
 Things that are used: 
 
+ - Typescript
+ - Express JS
  - PrismaORM
  - Mysql Database
  - Nanoid for generating UID
