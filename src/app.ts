@@ -2,15 +2,18 @@ import express, { Application } from 'express';
 import morgan from 'morgan';
 import todoController from './modules/todo/todo.controller';
 import prisma from './repository/prisma.db';
+import { httpExceptionMiddleware } from './middlewares/http.exception.middleware';
 
 class App {
     private port: number;
     public app: Application;
+    
     constructor(port: number) {
         this.app = express();
         this.port = port || 3000;
         this.middlewares();
         this.initControllers();
+        this.initHttpException();
     }
 
     private middlewares(){
@@ -20,6 +23,10 @@ class App {
     
     private initControllers(){
         this.app.use('/api', todoController.router);   
+    }
+    
+    private initHttpException(){
+        this.app.use(httpExceptionMiddleware);
     }
     
     public async start(): Promise<void> {

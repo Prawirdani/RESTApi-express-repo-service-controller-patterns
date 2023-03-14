@@ -1,8 +1,11 @@
 import TodoService from './todo.service';
 import TodoRepository from '../../repository/todo.repository';
-import { Request, Response, Router } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import Controller from '../../utils/interfaces/controller.interface';
 import { TodoUpdateDTO } from './todo.interfaces';
+import { HttpException } from '../../middlewares/http.exception.middleware';
+import { CREATED, NOT_FOUND, OK } from '../../utils/statuscodes';
+import { Todo } from '@prisma/client';
 
 
 class TodoController implements Controller{
@@ -19,94 +22,106 @@ class TodoController implements Controller{
             .get(this.index);
         
         this.router.route(`${this.path}/:id`)
-            .get(this.show)
-            .put(this.update)
-            .delete(this.delete);
+            .get(this.checkTodoExistMiddleware, this.show)
+            .put(this.checkTodoExistMiddleware, this.update)
+            .delete(this.checkTodoExistMiddleware, this.delete);
     }
+
+    checkTodoExistMiddleware = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        const id = req.params.id;
+        const findExist = await this._service.getTodoById(id);
+        if (!findExist) {
+            return next(new HttpException(NOT_FOUND, 'Todo not exist'));
+        }
+        req.app.locals.todo = findExist;
+        return next();
+    };
 
     private create = async (
         req: Request,
-        res: Response
+        res: Response,
+        next: NextFunction
     ): Promise<Response|void> => {
         const {title, desc} = req.body;
         try {
             await this._service.createTodo({title, desc});
-            return res.status(201).send({
+            return res.status(CREATED).send({
                 msg: 'Todos created successfully'
             });
         }
         catch (error) {
-            return res.status(500).send({
-                msg: 'Something went wrong',
-                error
-            });
+            return next(new HttpException());
         }
     };
 
     private index = async (
         req: Request,
-        res: Response
+        res: Response,
+        next: NextFunction
     ): Promise<Response|void> => {
         try {
             const todos = await this._service.getTodos();
-            return res.status(200).send(todos);
+            return res.status(OK).send(todos);
         } catch (error) {
-            return res.status(400).send({
-                msg: error
-            });   
+            return next(new HttpException());
         }
     };
 
     private show = async (
         req: Request,
-        res: Response
+        res: Response,
+        next: NextFunction
     ): Promise<Response|void> => {
-        const id = req.params.id;
-        const todo = await this._service.getTodoById(id);
-        if (!todo) return res.status(404).send({msg: 'Todo not exist'});
-
-        return res.status(200).send(todo);
+        try{
+            const todo: Todo = req.app.locals.todo;
+            return res.status(OK).send(todo);
+        }catch(error){
+            return next(new HttpException());
+        }
     };
 
     private update = async (
         req: Request,
-        res: Response
+        res: Response,
+        next: NextFunction
     ): Promise<Response | void> => {
         try {
-            const id = req.params.id;
-            const findExist = await this._service.getTodoById(id);
-            if (!findExist) return res.status(404).send({msg: 'Todo not exist'});
-
+            const todo: Todo = req.app.locals.todo;
+            const todoId = todo.id;
             const {title, desc, isDone} = req.body;
-
+        
             const updateRequest: TodoUpdateDTO = {
-                id,
+                id: todoId,
                 title,
                 desc,
                 isDone
             };
             await this._service.updateTodoById(updateRequest);
-            return res.status(200).send({msg: 'success update todo'});
+            return res.status(OK).send({msg: 'success update todo'});
 
             
         } catch (error) {
-            res.status(500).send({msg: 'Something went wrong'});            
+            return next(new HttpException());
         }
     };
 
     private delete = async (
         req: Request,
-        res: Response
+        res: Response,
+        next: NextFunction
     ): Promise<Response|void> => {
         try{
-            const id = req.params.id;
-            const findExist = await this._service.getTodoById(id);
-            if (!findExist) return res.status(404).send({msg: 'Todo not exist'});
+            const todo: Todo = req.app.locals.todo;
+            const todoId = todo.id;
 
-            await this._service.deleteTodoById(id);
-            return res.status(200).send({msg: 'Todo deleted successfully'});
+            await this._service.deleteTodoById(todoId);
+            return res.status(OK).send({msg: 'Todo deleted successfully'});
         }catch (error) {
-            return res.status(500).send({msg: 'Something went wrong'});
+            return next(new HttpException());
         }
         
     };
@@ -120,3 +135,4 @@ const todoController = new TodoController(todoService);
 
 
 export default todoController as TodoController;
+

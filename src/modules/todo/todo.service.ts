@@ -33,12 +33,6 @@ class TodoService {
         return this._repo.delete(id);
     }
 
-    // async findExist(id: string) {
-    //     const exist = await this.getTodoById(id);
-    //     if (!exist) return false;
-    //     return true;
-    // }
-
     async countTodos(){
         return this._repo.count();
     }

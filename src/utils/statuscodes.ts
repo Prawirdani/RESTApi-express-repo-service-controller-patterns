@@ -1,0 +1,13 @@
+const OK = 200;
+const BAD_REQUEST = 400;
+const INTERNAL_SERVER_ERROR = 500;
+const NOT_FOUND = 404;
+const CREATED = 201;
+
+export {
+    OK,
+    BAD_REQUEST,
+    NOT_FOUND,
+    INTERNAL_SERVER_ERROR,
+    CREATED
+};
