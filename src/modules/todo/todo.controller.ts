@@ -1,11 +1,15 @@
+import { NextFunction, Request, Response, Router } from 'express';
 import TodoService from './todo.service';
 import TodoRepository from '../../repository/todo.repository';
-import { NextFunction, Request, Response, Router } from 'express';
 import Controller from '../../utils/interfaces/controller.interface';
-import { TodoUpdateDTO } from './todo.interfaces';
+import { TodoUpdateDTO } from './todo.dtos';
 import { HttpException } from '../../middlewares/http.exception.middleware';
 import { CREATED, NOT_FOUND, OK } from '../../utils/statuscodes';
 import { Todo } from '@prisma/client';
+import { validateRequest } from '../../middlewares/request.validator.middleware';
+import { TodoCreateSchema, TodoUpdateSchema } from './todo.request.schema';
+
+
 
 
 class TodoController implements Controller{
@@ -18,12 +22,12 @@ class TodoController implements Controller{
 
     private initRoutes():void {
         this.router.route(`${this.path}`)
-            .post(this.create)
+            .post(validateRequest(TodoCreateSchema), this.create)
             .get(this.index);
         
         this.router.route(`${this.path}/:id`)
             .get(this.checkTodoExistMiddleware, this.show)
-            .put(this.checkTodoExistMiddleware, this.update)
+            .put(this.checkTodoExistMiddleware, validateRequest(TodoUpdateSchema), this.update)
             .delete(this.checkTodoExistMiddleware, this.delete);
     }
 
@@ -46,7 +50,7 @@ class TodoController implements Controller{
         res: Response,
         next: NextFunction
     ): Promise<Response|void> => {
-        const {title, desc} = req.body;
+        const {title, desc} = req.body;    
         try {
             await this._service.createTodo({title, desc});
             return res.status(CREATED).send({

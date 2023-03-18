@@ -1,14 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
 import { INTERNAL_SERVER_ERROR } from '../utils/statuscodes';
+import joi from 'joi';
 
 class HttpException extends Error {
     public status: number;
-    public message: string;
+    public messages: string | joi.ValidationErrorItem[];
 
-    constructor(status?: number, message?: string) {
-        super(message);
+    constructor(status?: number, message?: string | joi.ValidationErrorItem[]) {
+        super();
         this.status = status || INTERNAL_SERVER_ERROR;
-        this.message = message || 'Something went wrong';       
+        this.messages = message || 'Something went wrong';       
     }
 }
 
@@ -19,7 +20,7 @@ const httpExceptionMiddleware = (
     next: NextFunction
 ): void => {
     const status = error.status;
-    const message = error.message;
+    const message = error.messages;
 
     res.status(status).send({
         status,

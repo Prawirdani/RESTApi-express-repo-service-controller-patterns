@@ -1,5 +1,5 @@
 import { Todo, PrismaClient} from '@prisma/client';
-import { TodoCreateDTO, TodoUpdateDTO } from '../modules/todo/todo.interfaces';
+import { TodoCreateDTO, TodoUpdateDTO } from '../modules/todo/todo.dtos';
 import prisma from './prisma.db';
 
 class TodoRepository {
@@ -28,13 +28,13 @@ class TodoRepository {
         });
     }
 
-    async update(request: TodoUpdateDTO): Promise<Todo | null> {
+    async update(data: TodoUpdateDTO): Promise<Todo | null> {
         return this._prisma.todo.update({
-            where: { id: request.id},
+            where: { id: data.id},
             data: {
-                title: request.title,
-                desc: request.desc,
-                isDone: request.isDone
+                title: data.title,
+                desc: data.desc,
+                isDone: data.isDone
             }
         });
     }

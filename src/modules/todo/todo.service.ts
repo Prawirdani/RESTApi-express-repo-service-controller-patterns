@@ -1,20 +1,22 @@
 import TodoRepository from '../../repository/todo.repository';
 import { customAlphabet } from 'nanoid';
-import { TodoCreateDTO, TodoUpdateDTO } from './todo.interfaces';
+import { TodoCreateDTO, TodoUpdateDTO } from './todo.dtos';
 
 const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 30);
 
 class TodoService {
     constructor(private readonly _repo: TodoRepository){}
 
-    async createTodo(requestData: {title: string, desc: string}){
-        const data: TodoCreateDTO = {
+    async createTodo(request: {title: string, desc: string}){
+        const newTodo: TodoCreateDTO = {
             id: nanoid(),
-            title: requestData.title,
-            desc: requestData.desc
+            title: request.title,
+            desc: request.desc
         };
 
-        return this._repo.create(data);
+        const x: Omit<TodoCreateDTO, 'id'> = newTodo;
+        console.log(x);
+        return this._repo.create(newTodo);
     }
 
     async getTodos(){
