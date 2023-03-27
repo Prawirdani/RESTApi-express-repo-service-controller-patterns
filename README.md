@@ -8,7 +8,6 @@ Things that are used:
  - PrismaORM
  - Mysql Database
  - Nanoid for generating UID
- 
- There are few things to add, such as Request Validator and HTTPException Handling.
- 
+ - Joi for Request Body Validation
+  
  If there is anything you need to ask, feel free to DM me via my instagram **@prwrdani** .
