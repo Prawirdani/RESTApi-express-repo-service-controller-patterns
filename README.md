@@ -1,4 +1,5 @@
-# RESTApi-express-repo-service-controller-patterns
+# Gotta fix this latter, prisma sux
+## RESTApi-express-repo-service-controller-patterns
 An example of Expressjs RESTful API using Typescript with **Repository** -> **Service** -> **Controller** Architecture.
 
 Things that are used: 
